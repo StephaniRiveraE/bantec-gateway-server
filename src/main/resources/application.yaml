@@ -37,7 +37,7 @@ spring:
       routes:
         # RUTA 1: CLIENTES
         - id: clientes-service
-          uri: ${CLIENTES_SERVICE_URL:http://micro-clientes:8080}
+          uri: ${CLIENTES_SERVICE_URL:http://service-clientes:80}
           predicates:
             - Path=/api/v1/clientes/**
 
@@ -55,7 +55,7 @@ spring:
 
         # RUTA 4: CUENTAS AHORROS
         - id: cuentas-ahorros-service
-          uri: ${CUENTAS_SERVICE_URL:http://micro-cuentas:8081}
+          uri: ${CUENTAS_SERVICE_URL:http://service-cuentas:80}
           predicates:
             - Path=/api/v1/cuentas/ahorros/**
 
@@ -73,7 +73,7 @@ spring:
 
         # RUTA 7: TRANSACCIONES
         - id: transacciones-service
-          uri: ${TRANSACCIONES_SERVICE_URL:http://ms-transaccion:8080}
+          uri: ${TRANSACCIONES_SERVICE_URL:http://service-transacciones:80}
           predicates:
             - Path=/api/transacciones/**
 
@@ -97,13 +97,13 @@ spring:
 
         # RUTA 9: SUCURSALES
         - id: sucursales-service
-          uri: ${SUCURSALES_SERVICE_URL:http://micro-sucursales:8080}
+          uri: ${SUCURSALES_SERVICE_URL:http://service-sucursales:80}
           predicates:
             - Path=/api/sucursales/**
 
         # RUTA 10: SWITCH PROXY
         - id: switch-proxy-service
-          uri: ${TRANSACCIONES_SERVICE_URL:http://ms-transaccion:8080}
+          uri: ${TRANSACCIONES_SERVICE_URL:http://service-transacciones:80}
           predicates:
             - Path=/api/v2/switch/**
 
@@ -113,13 +113,13 @@ springdoc:
     path: /swagger-ui.html
     urls:
       - name: Microservicio Clientes
-        url: http://micro-clientes:8080/v3/api-docs
+        url: http://service-clientes:80/v3/api-docs
       - name: Microservicio Cuentas
-        url: http://micro-cuentas:8081/v3/api-docs
+        url: http://service-cuentas:80/v3/api-docs
       - name: Microservicio Transacciones
-        url: http://ms-transaccion:8080/v3/api-docs
+        url: http://service-transacciones:80/v3/api-docs
       - name: Microservicio Sucursales
-        url: http://micro-sucursales:8080/v3/api-docs
+        url: http://service-sucursales:80/v3/api-docs
   api-docs:
     enabled: true
 
@@ -128,3 +128,15 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty: INFO
+
+# Actuator & Probes
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always

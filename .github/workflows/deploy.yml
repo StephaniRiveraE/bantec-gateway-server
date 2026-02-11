@@ -51,16 +51,10 @@ jobs:
       - name: Configurar kubectl
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
       
-      - name: Verificar o Crear Deployment
+      - name: Deploy a EKS
         run: |
-          if kubectl get deployment ${{ env.SERVICE_NAME }} -n ${{ env.NAMESPACE }} > /dev/null 2>&1; then
-            echo "✅ Deployment existe, actualizando imagen..."
-            kubectl set image deployment/${{ env.SERVICE_NAME }} \
-              ${{ env.SERVICE_NAME }}=${{ env.IMAGE }} \
-              -n ${{ env.NAMESPACE }}
-          else
-            echo "📦 Deployment no existe, creando..."
-            cat <<EOF | kubectl apply -f -
+          echo "📦 Desplegando manifest en EKS..."
+          cat <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -97,15 +91,6 @@ jobs:
                     env:
                       - name: SPRING_PROFILES_ACTIVE
                         value: "prod"
-                      # Inyección de URLs de servicios internos (Service Discovery K8s)
-                      - name: CLIENTES_SERVICE_URL
-                        value: "http://service-clientes"
-                      - name: CUENTAS_SERVICE_URL
-                        value: "http://service-cuentas"
-                      - name: TRANSACCIONES_SERVICE_URL
-                        value: "http://service-transacciones"
-                      - name: SUCURSALES_SERVICE_URL
-                        value: "http://service-sucursales"
                     livenessProbe:
                       httpGet:
                         path: /actuator/health/liveness
@@ -136,7 +121,6 @@ jobs:
             selector:
               app: ${{ env.SERVICE_NAME }}
           EOF
-          fi
       
       - name: Esperar Rollout
         run: |
