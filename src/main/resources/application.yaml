@@ -1,39 +1,12 @@
 server:
   port: 8080 # El puerto público principal
+  shutdown: graceful
 
 spring:
   application:
     name: api-gateway
   cloud:
     gateway:
-      # Configuración CORS global
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "http://localhost:3001"
-              # IP Externa VM Bantec
-              - "http://35.208.102.103:3000"
-              - "http://35.208.102.103:3001"
-              - "http://35.208.102.103"
-              - "https://35.208.102.103"
-              - "https://35.208.102.103:3000"
-              - "https://35.208.102.103:3001"
-              # HTTPS DuckDNS domain
-              - "https://bantec-bank.duckdns.org"
-              - "https://bantec-bank.duckdns.org:8443"
-              # HTTPS sslip.io domains
-              - "https://bantec.35-208-102-103.sslip.io"
-              - "https://bantec.35-208-102-103.sslip.io:8443"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
       routes:
         # RUTA 1: CLIENTES
         - id: clientes-service
@@ -61,13 +34,13 @@ spring:
 
         # RUTA 5: TASAS DE INTERÉS
         - id: tasas-service
-          uri: ${CUENTAS_SERVICE_URL:http://micro-cuentas:8081}
+          uri: ${CUENTAS_SERVICE_URL:http://micro-cuentas:8080}
           predicates:
             - Path=/api/v1/cuentas/tasas/**
 
         # RUTA 6: TIPOS DE CUENTA
         - id: tipos-cuenta-service
-          uri: ${CUENTAS_SERVICE_URL:http://micro-cuentas:8081}
+          uri: ${CUENTAS_SERVICE_URL:http://micro-cuentas:8080}
           predicates:
             - Path=/api/v1/cuentas/tipos-cuenta/**
 
@@ -140,3 +113,12 @@ management:
       probes:
         enabled: true
       show-details: always
+
+# Cognito & APIM Integration
+cognito:
+  token-url: ${COGNITO_TOKEN_URL:https://auth-banca-dev.auth.us-east-2.amazoncognito.com}
+  client-id: ${COGNITO_CLIENT_ID:default-client-id}
+  client-secret: ${COGNITO_CLIENT_SECRET:default-client-secret}
+
+apim:
+  base-url: ${APIM_BASE_URL:https://api-gateway.example.com}
