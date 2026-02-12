@@ -4,97 +4,154 @@ server:
 
 spring:
   application:
-    name: api-gateway
+    name: api-gateway-bantec
   cloud:
     gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 45s
       routes:
         # RUTA 1: CLIENTES
         - id: clientes-service
-          uri: ${CLIENTES_SERVICE_URL:http://service-clientes:80}
+          uri: http://service-clientes:80
           predicates:
-            - Path=/api/v1/clientes/**
+            - Path=/bantec/api/v1/clientes/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 2: PERSONAS
         - id: personas-service
-          uri: ${CLIENTES_SERVICE_URL:http://micro-clientes:8080}
+          uri: http://service-clientes:80
           predicates:
-            - Path=/api/v1/personas/**
+            - Path=/bantec/api/v1/personas/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 3: EMPRESAS
         - id: empresas-service
-          uri: ${CLIENTES_SERVICE_URL:http://micro-clientes:8080}
+          uri: http://service-clientes:80
           predicates:
-            - Path=/api/v1/empresas/**
+            - Path=/bantec/api/v1/empresas/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 4: CUENTAS AHORROS
         - id: cuentas-ahorros-service
-          uri: ${CUENTAS_SERVICE_URL:http://service-cuentas:80}
+          uri: http://service-cuentas:80
           predicates:
-            - Path=/api/v1/cuentas/ahorros/**
+            - Path=/bantec/api/v1/cuentas/ahorros/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 5: TASAS DE INTERÉS
         - id: tasas-service
-          uri: ${CUENTAS_SERVICE_URL:http://micro-cuentas:8080}
+          uri: http://service-cuentas:80
           predicates:
-            - Path=/api/v1/cuentas/tasas/**
+            - Path=/bantec/api/v1/cuentas/tasas/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 6: TIPOS DE CUENTA
         - id: tipos-cuenta-service
-          uri: ${CUENTAS_SERVICE_URL:http://micro-cuentas:8080}
+          uri: http://service-cuentas:80
           predicates:
-            - Path=/api/v1/cuentas/tipos-cuenta/**
+            - Path=/bantec/api/v1/cuentas/tipos-cuenta/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 7: TRANSACCIONES
         - id: transacciones-service
-          uri: ${TRANSACCIONES_SERVICE_URL:http://service-transacciones:80}
+          uri: http://service-transacciones:80
           predicates:
-            - Path=/api/transacciones/**
-
-        # RUTA 7.1: WEBHOOKS INCOMING
-        - id: transacciones-incoming-service
-          uri: ${TRANSACCIONES_SERVICE_URL:http://ms-transaccion:8080}
-          predicates:
-            - Path=/api/incoming/**
-
-        # RUTA 7.2: WEBHOOKS CORE
-        - id: transacciones-core-service
-          uri: ${TRANSACCIONES_SERVICE_URL:http://ms-transaccion:8080}
-          predicates:
-            - Path=/api/core/**
+            - Path=/bantec/api/transacciones/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 8: BANCOS
         - id: bancos-service
-          uri: ${TRANSACCIONES_SERVICE_URL:http://ms-transaccion:8080}
+          uri: http://service-transacciones:80
           predicates:
-            - Path=/api/bancos/**
+            - Path=/bantec/api/bancos/**
+          filters:
+            - StripPrefix=1
 
         # RUTA 9: SUCURSALES
         - id: sucursales-service
-          uri: ${SUCURSALES_SERVICE_URL:http://service-sucursales:80}
+          uri: http://service-sucursales:80
           predicates:
-            - Path=/api/sucursales/**
+            - Path=/bantec/api/v1/sucursales/**
+          filters:
+            - StripPrefix=1
 
-        # RUTA 10: SWITCH PROXY
+        # RUTA 10: CORE (Switch incoming transfers)
+        - id: core-service
+          uri: http://service-transacciones:80
+          predicates:
+            - Path=/bantec/api/core/**
+          filters:
+            - StripPrefix=1
+
+        # RUTA 11: WEBHOOKS INCOMING
+        - id: webhook-incoming
+          uri: http://service-transacciones:80
+          predicates:
+            - Path=/bantec/api/incoming/**
+          filters:
+            - StripPrefix=1
+
+        # RUTA 12: SWITCH PROXY
         - id: switch-proxy-service
-          uri: ${TRANSACCIONES_SERVICE_URL:http://service-transacciones:80}
+          uri: http://service-transacciones:80
           predicates:
-            - Path=/api/v2/switch/**
+            - Path=/bantec/api/v2/switch/**
+          filters:
+            - StripPrefix=1
 
-# Configuración de Swagger centralizado
+        # RUTAS DE DOCUMENTACIÓN
+        - id: clientes-docs
+          uri: http://service-clientes:80
+          predicates:
+            - Path=/bantec/v3/api-docs/clientes/**
+          filters:
+            - RewritePath=/bantec/v3/api-docs/clientes/(?<segment>.*), /v3/api-docs/${segment}
+
+        - id: cuentas-docs
+          uri: http://service-cuentas:80
+          predicates:
+            - Path=/bantec/v3/api-docs/cuentas/**
+          filters:
+            - RewritePath=/bantec/v3/api-docs/cuentas/(?<segment>.*), /v3/api-docs/${segment}
+
+        - id: transacciones-docs
+          uri: http://service-transacciones:80
+          predicates:
+            - Path=/bantec/v3/api-docs/transacciones/**
+          filters:
+            - RewritePath=/bantec/v3/api-docs/transacciones/(?<segment>.*), /v3/api-docs/${segment}
+
+        - id: sucursales-docs
+          uri: http://service-sucursales:80
+          predicates:
+            - Path=/bantec/v3/api-docs/sucursales/**
+          filters:
+            - RewritePath=/bantec/v3/api-docs/sucursales/(?<segment>.*), /v3/api-docs/${segment}
+
+# Swagger UI Centralizado
 springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    urls:
-      - name: Microservicio Clientes
-        url: http://service-clientes:80/v3/api-docs
-      - name: Microservicio Cuentas
-        url: http://service-cuentas:80/v3/api-docs
-      - name: Microservicio Transacciones
-        url: http://service-transacciones:80/v3/api-docs
-      - name: Microservicio Sucursales
-        url: http://service-sucursales:80/v3/api-docs
   api-docs:
     enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: 1. Micro Clientes
+        url: /v3/api-docs/clientes
+      - name: 2. Micro Cuentas
+        url: /v3/api-docs/cuentas
+      - name: 3. MS Transacciones
+        url: /v3/api-docs/transacciones
+      - name: 4. Micro Sucursales
+        url: /v3/api-docs/sucursales
 
 # Configuración para ver los logs de ruteo (útil para debug)
 logging:
@@ -116,9 +173,9 @@ management:
 
 # Cognito & APIM Integration
 cognito:
-  token-url: ${COGNITO_TOKEN_URL:https://auth-banca-dev.auth.us-east-2.amazoncognito.com}
+  token-url: ${COGNITO_TOKEN_URL:https://auth-banca-digiconecu-dev-lhd4go.auth.us-east-2.amazoncognito.com/oauth2/token}
   client-id: ${COGNITO_CLIENT_ID:default-client-id}
   client-secret: ${COGNITO_CLIENT_SECRET:default-client-secret}
 
 apim:
-  base-url: ${APIM_BASE_URL:https://api-gateway.example.com}
+  base-url: ${APIM_BASE_URL:http://34.16.106.7:8000}
