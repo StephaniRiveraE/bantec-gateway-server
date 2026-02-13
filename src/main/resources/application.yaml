@@ -174,8 +174,8 @@ management:
 # Cognito & APIM Integration
 cognito:
   token-url: ${COGNITO_TOKEN_URL:https://auth-banca-digiconecu-dev-lhd4go.auth.us-east-2.amazoncognito.com/oauth2/token}
-  client-id: ${COGNITO_CLIENT_ID:default-client-id}
-  client-secret: ${COGNITO_CLIENT_SECRET:default-client-secret}
+  client-id: ${COGNITO_CLIENT_ID:7oj12jtu8d3keilv1e1gjkc8e4}
+  client-secret: ${COGNITO_CLIENT_SECRET:16o9bdppi2qku69vuk7qdcim4fqrkmkggder3iq47p9cs29tqqoq}
 
 apim:
-  base-url: ${APIM_BASE_URL:http://34.16.106.7:8000}
+  base-url: ${APIM_BASE_URL:https://gf0js7uezg.execute-api.us-east-2.amazonaws.com/dev}
